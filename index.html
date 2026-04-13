@@ -91,7 +91,7 @@
 <div class="card">
   <h1>Service Unavailable</h1>
   <p>We're having trouble reaching the server.<br>
-     (Likely a temporary satellite connection issue)</p>
+     (Likely a temporary connection issue)</p>
 
   <div class="status">
     <div id="dot" class="dot"></div>
@@ -102,7 +102,9 @@
 </div>
 
 <script>
-  const STATUS_URL = "https://aprs.td97.uk"; // <-- CHANGE THIS
+  // 🔴 CHANGE THESE TWO VALUES
+  const CHECK_URL = "https://f57f064e-a3a5-416a-abf8-ccb0df847969.cfargotunnel.com"; // direct tunnel
+  const REDIRECT_URL = "https://aprs.td97.uk"; // your normal domain
 
   async function checkStatus() {
     const dot = document.getElementById("dot");
@@ -112,18 +114,23 @@
     text.textContent = "Checking connection...";
 
     try {
-      const res = await fetch(STATUS_URL, {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+
+      await fetch(CHECK_URL, {
         method: "HEAD",
-        mode: "no-cors",
-        cache: "no-store"
+        cache: "no-store",
+        signal: controller.signal
       });
+
+      clearTimeout(timeout);
 
       dot.className = "dot online";
       text.textContent = "Service is back online! Redirecting...";
 
       setTimeout(() => {
-        window.location.href = STATUS_URL;
-      }, 1500);
+        window.location.href = REDIRECT_URL;
+      }, 1200);
 
     } catch (e) {
       dot.className = "dot offline";
@@ -139,4 +146,3 @@
 </script>
 
 </body>
-</html>
